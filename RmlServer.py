@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import pickle
 import configparser
 
 server = Flask(__name__)
+CORS(server)
 
 video_to_text_model = None
 lips_crop_model = None
@@ -26,13 +28,13 @@ def config_server():
     weights_file_lc = config.get('DEFAULT', 'lips_crop_weights_file')
     port = config.get('DEFAULT', 'server_port')
 
-    # load_model(weights_file_vtt, video_to_text_model)
-    # load_model(weights_file_lc, lips_crop_model)
+    load_model(weights_file_vtt, video_to_text_model)
+    load_model(weights_file_lc, lips_crop_model)
 
 
 @server.route('/video-to-text', methods=['POST'])
 def process_video():
-    if video_to_text_model is None or 'video' not in request.files:
+    if video_to_text_model is None:
         return jsonify({'status': 'error', 'message': 'Model not loaded. Please load the model first.'}), 500
 
     if 'video' not in request.files:
