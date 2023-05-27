@@ -1,19 +1,17 @@
+import configparser
+
 from flask import Flask, request, jsonify
 from flask_cors import CORS
-import pickle
-import configparser
+
+from Utils import vtt_input_shape
+from models.Models import create_vtt_model
 
 server = Flask(__name__)
 CORS(server)
 
 video_to_text_model = None
 lips_crop_model = None
-port = 5000
-
-
-def load_model(file_name, loaded_model):
-    with open(file_name, 'rb') as f:
-        loaded_model = pickle.load(f)
+port = 5000  # Default port
 
 
 def config_server():
@@ -24,23 +22,27 @@ def config_server():
     config = configparser.ConfigParser()
     config.read('env.properties')
 
+    port = config.get('DEFAULT', 'server_port')
     weights_file_vtt = config.get('DEFAULT', 'video_to_text_weights_file')
     weights_file_lc = config.get('DEFAULT', 'lips_crop_weights_file')
-    port = config.get('DEFAULT', 'server_port')
 
-    load_model(weights_file_vtt, video_to_text_model)
-    load_model(weights_file_lc, lips_crop_model)
+    video_to_text_model = create_vtt_model(vtt_input_shape)
+    video_to_text_model.load_weights(weights_file_vtt)
+
+    # lips_crop_model = create_lc_model()
+    # lips_crop_model.load_model(weights_file_lc)
 
 
 @server.route('/video-to-text', methods=['POST'])
 def process_video():
-    if video_to_text_model is None:
-        return jsonify({'status': 'error', 'message': 'Model not loaded. Please load the model first.'}), 500
-
     if 'video' not in request.files:
         return jsonify({'status': 'error', 'message': 'No video file found in the request.'}), 400
 
-    video_file = preprocessing_input(request.files['video'])
+    if video_to_text_model is None:
+        return jsonify({'status': 'error', 'message': 'Service in not available at the moment.'}), 500
+
+    video_file = request.files['video']
+    # video_file = preprocessing_input(request.files['video'])
 
     generated_text = generate_text(video_file)
 
@@ -49,7 +51,8 @@ def process_video():
 
 
 def preprocessing_input(video):
-    return lips_crop_model.predict(video)
+    # return lips_crop_model.predict(video)
+    pass
 
 
 def generate_text(video):
