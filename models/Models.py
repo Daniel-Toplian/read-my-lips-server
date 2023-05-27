@@ -1,5 +1,6 @@
 from keras import Sequential
 from keras.layers import Conv3D, Activation, MaxPool3D, TimeDistributed, Flatten, Bidirectional, LSTM, Dropout, Dense
+from keras.optimizers import Adam
 
 from src.Utils import char_to_num
 
@@ -28,6 +29,8 @@ def create_vtt_model(input_shape):
     model.add(Dropout(.5))
 
     model.add(Dense(char_to_num.vocabulary_size() + 1, kernel_initializer='he_normal', activation='softmax'))
+
+    model.compile(optimizer=Adam(learning_rate=0.0001))
 
     return model
 
