@@ -1,6 +1,7 @@
 from keras import Sequential
 from keras.layers import Conv3D, Activation, MaxPool3D, TimeDistributed, Flatten, Bidirectional, LSTM, Dropout, Dense
 from keras.optimizers import Adam
+import cv2
 
 from src.Utils import char_to_num
 
@@ -35,6 +36,7 @@ def create_vtt_model(input_shape):
     return model
 
 
-def create_lc_model(input_shape):
-    model = Sequential()
-    return model
+def create_lc_model(weight_file):
+    mouth_cascade = cv2.CascadeClassifier('weight_file')
+
+    return mouth_cascade
