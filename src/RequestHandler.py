@@ -7,7 +7,7 @@ from flask import jsonify
 
 from Utils import num_to_char
 from Utils import vtt_input_shape
-from models.Models import create_vtt_model, create_lc_model
+from src.models.ModelsCreator import create_lc_model, create_vtt_model
 
 video_to_text_model = None
 lips_crop_model = None
@@ -18,16 +18,15 @@ class RequestHandler:
         weights_file_vtt = config.get('DEFAULT', 'video_to_text_weights_file')
         weights_file_lc = config.get('DEFAULT', 'lips_crop_weights_file')
 
-        self.video_to_text_model = create_vtt_model(vtt_input_shape)
-        self.video_to_text_model.load_weights(weights_file_vtt)
-
         self.lips_crop_model = create_lc_model(weights_file_lc)
+        self.video_to_text_model = create_vtt_model(weights_file_vtt, input_shape=vtt_input_shape)
+        print("----loading complete----")
 
     def process_video(self, request):
         if 'video' not in request.files:
             return jsonify({'status': 'error', 'message': 'No video file found in the request.'}), 400
 
-        if video_to_text_model is None:
+        if self.video_to_text_model is None:
             return jsonify({'status': 'error', 'message': 'Service in not available at the moment.'}), 500
 
         uploaded_file = request.files['video']
@@ -49,10 +48,10 @@ class RequestHandler:
             frames = []
             for _ in range(int(cap.get(cv2.CAP_PROP_FRAME_COUNT))):
                 ret, frame = cap.read()
-                resized_frame = cv2.resize(frame, (360, 288))
-                frame = tf.image.rgb_to_grayscale(resized_frame)
-                # frame = crop_mouth_in_frame(frame)
-                frames.append(frame[190:236, 80:220, :])
+                frame = self.crop_mouth_in_frame(frame)
+                frame = tf.image.rgb_to_grayscale(frame)
+                frame = tf.image.resize(frame, [46, 140])
+                frames.append(frame)
 
             cap.release()
 
