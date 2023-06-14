@@ -46,8 +46,10 @@ class RequestHandler:
             cap = cv2.VideoCapture(str(temp_filename))
 
             frames = []
-            for _ in range(int(cap.get(cv2.CAP_PROP_FRAME_COUNT))):
+            while cap.isOpened():
                 ret, frame = cap.read()
+                if not ret:
+                    break
                 frame = self.crop_mouth_in_frame(frame)
                 frame = tf.image.rgb_to_grayscale(frame)
                 frame = tf.image.resize(frame, [46, 140])
