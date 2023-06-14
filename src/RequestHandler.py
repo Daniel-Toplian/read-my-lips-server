@@ -89,7 +89,7 @@ class RequestHandler:
         sentence_list = [tf.strings.reduce_join([num_to_char(word) for word in sentence]) for sentence in decoded_text]
 
         for sentence in sentence_list:
-            string_builder.write(str(sentence.numpy()))
+            string_builder.write(sentence.numpy().decode())
 
         generated_text = string_builder.getvalue()
         string_builder.close()
