@@ -9,6 +9,7 @@ from flask import jsonify
 from Utils import num_to_char
 from Utils import vtt_input_shape
 from src.models.ModelsCreator import create_lc_model, create_vtt_model
+from autocorrect import Speller
 
 video_to_text_model = None
 lips_crop_model = None
@@ -21,6 +22,7 @@ class RequestHandler:
 
         self.lips_crop_model = create_lc_model(weights_file_lc)
         self.video_to_text_model = create_vtt_model(weights_file_vtt, input_shape=vtt_input_shape)
+        self.speller = Speller()
         print("----loading complete----")
 
     def process_video(self, request):
@@ -93,7 +95,7 @@ class RequestHandler:
 
         generated_text = string_builder.getvalue()
         string_builder.close()
-        return generated_text
+        return self.speller(generated_text)
 
     def crop_mouth_in_frame(self, frame):
         ds_factor = 1
