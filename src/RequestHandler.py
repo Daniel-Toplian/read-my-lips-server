@@ -1,4 +1,5 @@
 import io
+import os
 import tempfile
 from pathlib import Path
 
@@ -14,6 +15,15 @@ video_to_text_model = None
 lips_crop_model = None
 
 
+def validate_upload_file(uploaded_file):
+    allowed_extensions = ['.mp4', '.mov', '.avi', '.mpg']
+    allowed_mimetypes = ['video/mp4', 'video/quicktime', 'video/mpeg']
+
+    file_extension = os.path.splitext(uploaded_file.filename)[1]
+
+    return file_extension.lower() not in allowed_extensions or uploaded_file.mimetype not in allowed_mimetypes
+
+
 class RequestHandler:
     def __init__(self, config):
         weights_file_vtt = config.get('DEFAULT', 'video_to_text_weights_file')
@@ -25,7 +35,7 @@ class RequestHandler:
         print("----loading complete----")
 
     def process_video(self, request):
-        if 'video' not in request.files:
+        if 'video' not in request.files or validate_upload_file(request.files['video']):
             return jsonify({'status': 'error', 'message': 'No video file found in the request.'}), 400
 
         if self.video_to_text_model is None:
@@ -99,13 +109,12 @@ class RequestHandler:
         sentence_list = [tf.strings.reduce_join([num_to_char(word) for word in sentence]) for sentence in decoded_text]
 
         for sentence in sentence_list:
-            string_builder.write(sentence.numpy().decode() + '.')
-            string_builder.write('\n')
+            string_builder.write(sentence.numpy().decode())
+        string_builder.write(".")
 
         generated_text = string_builder.getvalue()
         string_builder.close()
-        # return self.speller(generated_text)
-        return generated_text
+        return self.speller(generated_text)
 
     def crop_mouth_from_face_in_frame(self, frame):
         face_detected = True
