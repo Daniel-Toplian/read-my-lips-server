@@ -17,11 +17,11 @@ lips_crop_model = None
 
 class RequestHandler:
     def __init__(self, config):
-        weights_file_vtt = config.get('DEFAULT', 'video_to_text_weights_file')
-        weights_file_lc = config.get('DEFAULT', 'lips_crop_weights_file')
+        model_file_vtt = config.get('DEFAULT', 'video_to_text_model_file')
+        model_file_lc = config.get('DEFAULT', 'lips_crop_model_file')
 
-        self.lips_crop_model = create_lc_model(weights_file_lc)
-        self.video_to_text_model = create_vtt_model(weights_file_vtt)
+        self.lips_crop_model = create_lc_model(model_file_lc)
+        self.video_to_text_model = create_vtt_model(model_file_vtt)
         self.speller = Speller()
         print("----loading complete----")
 
@@ -44,8 +44,8 @@ class RequestHandler:
         return jsonify({'status': 'error', 'message': 'Unable to find a face! Please upload an acceptable video'}), 406
 
     def validate_upload_file(self, uploaded_file):
-        allowed_extensions = ['.mp4', '.mov', '.avi']
-        allowed_mimetypes = ['video/mp4', 'video/quicktime']
+        allowed_extensions = ['.mp4', '.mov', '.avi', '.mpg']
+        allowed_mimetypes = ['video/mp4', 'video/quicktime', 'video/mpeg']
 
         file_extension = os.path.splitext(uploaded_file.filename)[1]
 
@@ -108,13 +108,12 @@ class RequestHandler:
         sentence_list = [tf.strings.reduce_join([num_to_char(word) for word in sentence]) for sentence in decoded_text]
 
         for sentence in sentence_list:
-            string_builder.write(sentence.numpy().decode() + '.')
-            string_builder.write('\n')
+            string_builder.write(sentence.numpy().decode())
+        string_builder.write(".")
 
         generated_text = string_builder.getvalue()
         string_builder.close()
-        # return self.speller(generated_text)
-        return generated_text
+        return self.speller(generated_text)
 
     def crop_mouth_from_face_in_frame(self, frame):
         face_detected = True
