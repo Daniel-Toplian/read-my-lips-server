@@ -1,0 +1,6 @@
+autocorrect==2.6.1
+Flask==2.2.2
+Flask-Cors==3.0.10
+opencv-python==4.7.0.72
+keras==2.12.0
+waitress==2.1.2

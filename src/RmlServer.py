@@ -4,7 +4,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask import request
 
-from src.RequestHandler import RequestHandler
+from RequestHandler import RequestHandler
 
 server = Flask(__name__)
 CORS(server)
@@ -24,6 +24,11 @@ def config_server():
     request_handler = RequestHandler(config)
 
 
+@server.route('/test', methods=['GET'])
+def test():
+    return 'habani the king'
+
+
 @server.route('/video-to-text', methods=['POST'])
 def process_video():
     return request_handler.process_video(request)
@@ -31,4 +36,5 @@ def process_video():
 
 if __name__ == '__main__':
     config_server()
-    server.run(port=port)
+    from waitress import serve
+    serve(server, host="0.0.0.0", port=port)

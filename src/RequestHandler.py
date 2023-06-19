@@ -9,7 +9,7 @@ from autocorrect import Speller
 from flask import jsonify
 
 from Utils import num_to_char
-from src.models.ModelsCreator import create_lc_model, create_vtt_model
+from models.ModelsCreator import create_lc_model, create_vtt_model
 
 video_to_text_model = None
 lips_crop_model = None

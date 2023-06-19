@@ -1,6 +1,6 @@
 import cv2
 import keras
-import tf
+import tensorflow as tf
 
 
 def create_lc_model(weight_file):
