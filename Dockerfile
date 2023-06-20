@@ -8,7 +8,9 @@ RUN pip install --upgrade pip \
 
 WORKDIR /app
 
-COPY . .
+COPY src .
+COPY resources resources
+COPY env.properties .
 
 ENTRYPOINT [ "python" ]
-CMD [ "/app/src/RmlServer.py"]
+CMD [ "RmlServer.py"]
