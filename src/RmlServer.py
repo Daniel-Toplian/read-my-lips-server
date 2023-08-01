@@ -24,11 +24,6 @@ def config_server():
     request_handler = RequestHandler(config)
 
 
-@server.route('/test', methods=['GET'])
-def test():
-    return 'habani the king'
-
-
 @server.route('/video-to-text', methods=['POST'])
 def process_video():
     return request_handler.process_video(request)
