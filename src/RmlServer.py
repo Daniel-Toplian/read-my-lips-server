@@ -3,6 +3,7 @@ import configparser
 from flask import Flask
 from flask_cors import CORS
 from flask import request
+from waitress import serve
 
 from RequestHandler import RequestHandler
 
@@ -22,6 +23,7 @@ def config_server():
 
     port = config.get('DEFAULT', 'server_port')
     request_handler = RequestHandler(config)
+    serve(server, host="0.0.0.0", port=port)
 
 
 @server.route('/video-to-text', methods=['POST'])
@@ -31,5 +33,3 @@ def process_video():
 
 if __name__ == '__main__':
     config_server()
-    from waitress import serve
-    serve(server, host="0.0.0.0", port=port)

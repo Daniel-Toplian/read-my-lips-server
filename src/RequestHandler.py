@@ -52,7 +52,6 @@ class RequestHandler:
         return file_extension.lower() not in allowed_extensions or uploaded_file.mimetype not in allowed_mimetypes
 
     def preprocessing_input(self, video):
-        isNoFace = False
         with tempfile.TemporaryDirectory() as td:
             temp_filename = Path(td) / 'uploaded_video'
             video.save(temp_filename)
@@ -65,16 +64,11 @@ class RequestHandler:
                 if not ret:
                     break
                 frame = self.crop_mouth_from_face_in_frame(frame)
-                if frame is None:
-                    isNoFace = True
-                    break
-                frame = tf.image.rgb_to_grayscale(frame)
-                frames.append(frame)
+                if frame is not None:
+                    frame = tf.image.rgb_to_grayscale(frame)
+                    frames.append(frame)
 
             cap.release()
-
-            if isNoFace:
-                return None, None
 
             mean = tf.math.reduce_mean(frames)
             std = tf.math.reduce_std(tf.cast(frames, tf.float32))
